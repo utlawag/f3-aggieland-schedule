@@ -50,18 +50,31 @@ jobs:
           path: weekly_schedule_v2.png
           if-no-files-found: error
 
+      
       - name: Publish PNG to public repository
-        if: ${{ github.event_name == 'schedule' || inputs.schedule_week == 'upcoming' }}
         run: |
           mkdir -p published
-          cp weekly_schedule_v2.png published/weekly_schedule.png
+
+          if [ "${{ github.event_name }}" = "schedule" ] || [ "${{ inputs.schedule_week }}" = "upcoming" ]; then
+            IMAGE_NAME="weekly_schedule.png"
+            META_NAME="weekly_schedule_metadata.json"
+          else
+            IMAGE_NAME="current_week_schedule.png"
+            META_NAME="current_week_schedule_metadata.json"
+          fi
+
+          cp weekly_schedule_v2.png "published/$IMAGE_NAME"
+          cp weekly_schedule_metadata.json "published/$META_NAME"
+
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          cp weekly_schedule_metadata.json published/weekly_schedule_metadata.json
-          git add published/weekly_schedule.png published/weekly_schedule_metadata.json
+
+          git add "published/$IMAGE_NAME" "published/$META_NAME"
+
           if ! git diff --cached --quiet; then
-            git commit -m "Update weekly schedule image"
+            git commit -m "Update published schedule image"
             git push origin HEAD:main
           else
             echo "Published image is already up to date."
           fi
+
