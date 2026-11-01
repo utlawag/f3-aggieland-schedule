@@ -22,3 +22,6 @@ jobs:
 
       - name: Retrieve weekly Q schedule
         run: python schedule.py
+        env:
+          SUPABASE_API_KEY: ${{ secrets.SUPABASE_API_KEY }}
+
