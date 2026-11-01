@@ -1,4 +1,4 @@
-
+import os
 import json
 import urllib.request
 from datetime import datetime, timedelta
@@ -16,14 +16,17 @@ def main():
     monday = today + timedelta(days=(7 - today.weekday()) % 7)
     saturday = monday + timedelta(days=5)
 
-    request = urllib.request.Request(
-        API_URL,
-        data=json.dumps({"p_region_slug": "aggieland"}).encode(),
-        headers={
-            "Content-Type": "application/json",
-        },
-        method="POST",
-    )
+   api_key = os.environ["SUPABASE_API_KEY"]
+
+request = urllib.request.Request(
+    API_URL,
+    data=json.dumps({"p_region_slug": "aggieland"}).encode(),
+    headers={
+        "Content-Type": "application/json",
+        "apikey": api_key,
+    },
+    method="POST",
+)
 
     with urllib.request.urlopen(request, timeout=30) as response:
         data = json.load(response)
