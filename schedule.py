@@ -1,3 +1,4 @@
+
 import os
 import json
 import urllib.request
@@ -11,6 +12,7 @@ API_URL = (
 
 TIMEZONE = ZoneInfo("America/Chicago")
 
+
 def main():
     today = datetime.now(TIMEZONE).date()
     monday = today + timedelta(days=(7 - today.weekday()) % 7)
@@ -18,20 +20,21 @@ def main():
 
     api_key = os.environ["SUPABASE_API_KEY"]
 
-request = urllib.request.Request(
-    API_URL,
-    data=json.dumps({"p_region_slug": "aggieland"}).encode(),
-    headers={
-        "Content-Type": "application/json",
-        "apikey": api_key,
-    },
-    method="POST",
-)
+    request = urllib.request.Request(
+        API_URL,
+        data=json.dumps({"p_region_slug": "aggieland"}).encode(),
+        headers={
+            "Content-Type": "application/json",
+            "apikey": api_key,
+        },
+        method="POST",
+    )
 
     with urllib.request.urlopen(request, timeout=30) as response:
         data = json.load(response)
 
     calendar = data.get("calendar", [])
+
     workouts = [
         item for item in calendar
         if monday.isoformat() <= item.get("date", "") <= saturday.isoformat()
@@ -53,9 +56,12 @@ request = urllib.request.Request(
         ao = (workout.get("ao") or {}).get("name", "Unknown AO")
         q = workout.get("qName") or "OPEN"
         emphasis = workout.get("emphasis") or "Unspecified"
-        time = workout.get("startTime") or ""
+        start_time = workout.get("startTime") or ""
 
-        print(f"{workout['date']} | {time} | {ao} | {q} | {emphasis}")
+        print(
+            f"{workout['date']} | {start_time} | "
+            f"{ao} | {q} | {emphasis}"
+        )
 
 
 if __name__ == "__main__":
