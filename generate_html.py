@@ -198,7 +198,7 @@ def main():
     now = datetime.now(TZ)
     week_choice = os.environ.get("SCHEDULE_WEEK", "upcoming").strip().lower()
     if week_choice == "current":
-        monday = now.date() - timedelta(days=now.weekday())
+        monday = next_monday(now) if now.weekday() == 6 else now.date() - timedelta(days=now.weekday())
     elif week_choice == "upcoming":
         monday = next_monday(now)
     else:
