@@ -5,7 +5,7 @@ from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
 
 API_URL = (
-    "https://crtinvgnhpqnhouctmbh.supabase.co"
+    "https://crtinvqnhpqnhouctmbh.supabase.co"
     "/rest/v1/rpc/load_public_region_site"
 )
 
