@@ -1,4 +1,5 @@
 """Render F3 Aggieland's next Monday-Saturday Q schedule as a PNG."""
+import base64
 import html
 import json
 import os
@@ -13,7 +14,7 @@ from playwright.sync_api import sync_playwright
 API_URL = "https://crtinvqnhpqnhouctmbh.supabase.co/rest/v1/rpc/load_public_region_site"
 TZ = ZoneInfo("America/Chicago")
 OUTPUT = Path("weekly_schedule_v2.png")
-WIDTH = 2400
+WIDTH = 1900
 
 AO_COLORS = {
     "the cave": "#4169E1", "the forest": "#35B54A", "the keep": "#C9A227",
@@ -116,8 +117,12 @@ def panel_html(day, day_date, workouts):
                     return (1, 0)
     # Python's %I accepts non-zero-padded hour on common runners.
     contents = []
+    def ao_sort(item):
+        name = str((item.get("ao") or {}).get("name") or "").casefold()
+        return (name in {"f3 franklin", "f3 navasota"}, name)
+
     for label in sorted(groups, key=sort_key):
-        entries = "".join(workout_html(row) for row in groups[label])
+        entries = "".join(workout_html(row) for row in sorted(groups[label], key=ao_sort))
         contents.append(f'<div class="timegroup"><div class="time">{html.escape(label)}</div><div class="entries">{entries}</div></div>')
     if not contents:
         contents = ['<div class="empty">No workouts scheduled</div>']
@@ -145,12 +150,18 @@ def build_html(monday, workouts):
         ("🎒", "Ruck"), ("🆎", "Core"), ("💡", "30/30"), ("🗼", "Stairs"),
         ("🛡️", "Bootcamp"), ("🏅", "Murph Training"), ("📋", "Benchmark"), ("⭕", "Other"),
     ]
-    legend_html = "".join(f'<span><span class="emoji">{e}</span> {html.escape(label)}</span>' for e, label in legend)
+    legend_html = "".join(f'<span class="legend-item"><span class="emoji">{e}</span><span>{html.escape(label)}</span></span>' for e, label in legend)
+    logo_path = Path("f3-logo.png")
+    if not logo_path.is_file():
+        raise FileNotFoundError("Expected f3-logo.png at the repository root")
+    logo_uri = "data:image/png;base64," + base64.b64encode(logo_path.read_bytes()).decode("ascii")
     return f'''<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><style>
 * {{ box-sizing:border-box; }}
 body {{ margin:0; background:#090a0c; color:#f5f5f5; font-family:Arial,"DejaVu Sans",sans-serif; }}
 .canvas {{ width:{WIDTH}px; padding:34px 42px 35px; }}
-header {{ text-align:center; padding:0 0 25px; }}
+header {{ text-align:center; padding:0 0 20px; }}
+.brand {{ display:flex; align-items:center; justify-content:center; gap:12px; }}
+.brand img {{ width:68px; height:68px; object-fit:contain; }}
 h1 {{ margin:0; font-size:62px; font-weight:900; letter-spacing:1.7px; line-height:1.05; }}
 .subtitle {{ font-size:30px; letter-spacing:3px; font-weight:700; margin:7px 0 5px; }}
 .dates {{ color:#cdced2; font-size:25px; }}
@@ -168,15 +179,17 @@ h2 {{ margin:0; font-size:32px; line-height:1.2; letter-spacing:0.4px; }}
 .q.open {{ color:#39FF14; font-weight:900; text-shadow:0 0 5px #39ff1433; }}
 .emoji {{ font-family:"Noto Color Emoji","Apple Color Emoji","Segoe UI Emoji",sans-serif; font-size:0.93em; }}
 .empty {{ color:#adb0b8; font-size:23px; padding:12px 0; }}
-footer {{ margin-top:22px; border-top:2px solid #393b41; padding-top:13px; }}
-.legend-title {{ font-size:22px; font-weight:800; margin-bottom:8px; }}
-.legend {{ display:grid; grid-template-columns:repeat(6,minmax(0,1fr)); gap:10px 8px; font-size:20px; color:#dddfe3; }}
+footer {{ margin-top:18px; padding-top:0; }}
+.legend-box {{ border:2px solid #37393e; border-radius:12px; padding:11px 15px 12px; }}
+.legend-title {{ font-size:20px; font-weight:800; margin-bottom:7px; }}
+.legend {{ display:flex; flex-wrap:wrap; column-gap:22px; row-gap:7px; font-size:19px; color:#dddfe3; }}
+.legend-item {{ display:inline-flex; align-items:center; gap:4px; white-space:nowrap; }}
 .footline {{ display:flex; justify-content:space-between; align-items:center; margin-top:20px; color:#bdbfc6; font-size:20px; }}
 .footline strong {{ color:#e8e8ec; }}
 </style></head><body><div class="canvas">
-<header><h1>F3 AGGIELAND</h1><div class="subtitle">WEEKLY Q SCHEDULE</div><div class="dates">{html.escape(date_range_label(monday, monday + timedelta(days=5)))}</div></header>
+<header><div class="brand"><img src="{logo_uri}" alt="F3 logo"><h1>AGGIELAND</h1></div><div class="subtitle">WEEKLY Q SCHEDULE</div><div class="dates">{html.escape(date_range_label(monday, monday + timedelta(days=5)))}</div></header>
 <main class="grid">{''.join(panels)}</main>
-<footer><div class="legend-title">EMPHASIS KEY</div><div class="legend">{legend_html}</div>
+<footer><div class="legend-box"><div class="legend-title">EMPHASIS KEY</div><div class="legend">{legend_html}</div></div>
 <div class="footline"><span>AO LOCATIONS: <strong>F3AGGIELAND.COM/AO-LOCATIONS/</strong></span><span>Powered by <strong>The Q App</strong></span></div></footer>
 </div></body></html>'''
 
