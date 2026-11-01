@@ -14,7 +14,7 @@ from playwright.sync_api import sync_playwright
 API_URL = "https://crtinvqnhpqnhouctmbh.supabase.co/rest/v1/rpc/load_public_region_site"
 TZ = ZoneInfo("America/Chicago")
 OUTPUT = Path("weekly_schedule_v2.png")
-WIDTH = 1900
+WIDTH = 1650
 
 AO_COLORS = {
     "the cave": "#4169E1", "the forest": "#35B54A", "the keep": "#C9A227",
