@@ -16,7 +16,7 @@ def main():
     monday = today + timedelta(days=(7 - today.weekday()) % 7)
     saturday = monday + timedelta(days=5)
 
-   api_key = os.environ["SUPABASE_API_KEY"]
+    api_key = os.environ["SUPABASE_API_KEY"]
 
 request = urllib.request.Request(
     API_URL,
