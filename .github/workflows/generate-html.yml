@@ -2,6 +2,15 @@ name: Generate Weekly Schedule Image V2
 
 on:
   workflow_dispatch:
+    inputs:
+      schedule_week:
+        description: 'Which week should the image show?'
+        required: true
+        default: upcoming
+        type: choice
+        options:
+          - upcoming
+          - current
   schedule:
     - cron: '15 23 * * 0'
 
@@ -32,6 +41,7 @@ jobs:
         run: python generate_html.py
         env:
           SUPABASE_API_KEY: ${{ secrets.SUPABASE_API_KEY }}
+          SCHEDULE_WEEK: ${{ inputs.schedule_week || 'upcoming' }}
 
       - name: Upload PNG
         uses: actions/upload-artifact@v4
@@ -41,6 +51,7 @@ jobs:
           if-no-files-found: error
 
       - name: Publish PNG to public repository
+        if: ${{ github.event_name == 'schedule' || inputs.schedule_week == 'upcoming' }}
         run: |
           mkdir -p published
           cp weekly_schedule_v2.png published/weekly_schedule.png
