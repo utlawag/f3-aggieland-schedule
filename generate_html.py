@@ -195,7 +195,14 @@ footer {{ margin-top:18px; padding-top:0; }}
 
 
 def main():
-    monday = next_monday(datetime.now(TZ))
+    now = datetime.now(TZ)
+    week_choice = os.environ.get("SCHEDULE_WEEK", "upcoming").strip().lower()
+    if week_choice == "current":
+        monday = now.date() - timedelta(days=now.weekday())
+    elif week_choice == "upcoming":
+        monday = next_monday(now)
+    else:
+        raise ValueError(f"Unsupported SCHEDULE_WEEK: {week_choice}")
     saturday = monday + timedelta(days=5)
     data = fetch_schedule()
     rows = [r for r in data["calendar"] if monday.isoformat() <= r.get("date", "") <= saturday.isoformat()]
