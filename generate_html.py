@@ -210,7 +210,20 @@ def main():
         page.evaluate("document.fonts.ready")
         page.locator(".canvas").screenshot(path=str(OUTPUT))
         browser.close()
+    generated_at = datetime.now(TZ)
+    manifest = {
+        "weekStart": monday.isoformat(),
+        "weekEnd": saturday.isoformat(),
+        "generatedDate": generated_at.date().isoformat(),
+        "generatedAt": generated_at.isoformat(),
+        "workoutCount": len(rows),
+        "imageFile": "weekly_schedule.png",
+    }
+    Path("weekly_schedule_metadata.json").write_text(
+        json.dumps(manifest, indent=2) + "\\n", encoding="utf-8"
+    )
     print(f"Created {OUTPUT} containing {len(rows)} workouts")
+    print(f"Freshness metadata: {manifest}")
 
 
 if __name__ == "__main__":
