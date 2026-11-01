@@ -8,7 +8,7 @@ permissions:
 
 jobs:
   generate-html:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: Get repository files
         uses: actions/checkout@v4
