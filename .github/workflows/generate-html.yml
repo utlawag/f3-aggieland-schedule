@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   generate-html:
@@ -37,3 +37,17 @@ jobs:
           name: weekly-schedule-v2
           path: weekly_schedule_v2.png
           if-no-files-found: error
+
+      - name: Publish PNG to public repository
+        run: |
+          mkdir -p published
+          cp weekly_schedule_v2.png published/weekly_schedule.png
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add published/weekly_schedule.png
+          if ! git diff --cached --quiet; then
+            git commit -m "Update weekly schedule image"
+            git push origin HEAD:main
+          else
+            echo "Published image is already up to date."
+          fi
