@@ -220,7 +220,7 @@ def main():
         "imageFile": "weekly_schedule.png",
     }
     Path("weekly_schedule_metadata.json").write_text(
-        json.dumps(manifest, indent=2) + "\\n", encoding="utf-8"
+        json.dumps(manifest, indent=2) + "\n", encoding="utf-8"
     )
     print(f"Created {OUTPUT} containing {len(rows)} workouts")
     print(f"Freshness metadata: {manifest}")
