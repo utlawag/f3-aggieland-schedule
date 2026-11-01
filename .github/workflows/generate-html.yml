@@ -2,6 +2,8 @@ name: Generate Weekly Schedule Image V2
 
 on:
   workflow_dispatch:
+  schedule:
+    - cron: '15 23 * * 0'
 
 permissions:
   contents: write
@@ -44,7 +46,8 @@ jobs:
           cp weekly_schedule_v2.png published/weekly_schedule.png
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add published/weekly_schedule.png
+          cp weekly_schedule_metadata.json published/weekly_schedule_metadata.json
+          git add published/weekly_schedule.png published/weekly_schedule_metadata.json
           if ! git diff --cached --quiet; then
             git commit -m "Update weekly schedule image"
             git push origin HEAD:main
