@@ -73,6 +73,11 @@ jobs:
 
           if ! git diff --cached --quiet; then
             git commit -m "Update published schedule image"
+
+            # Incorporate changes published by other workflow runs.
+            git pull --rebase origin main
+
+            # Push the updated schedule.
             git push origin HEAD:main
           else
             echo "Published image is already up to date."
