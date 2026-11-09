@@ -72,7 +72,11 @@ def time_label(raw):
     if not raw:
         return "TIME TBD"
     try:
-        parsed = datetime.strptime(raw[:5], "%H:%M")
+        # Q App may use compact 24-hour times (0530) or colon times (05:30).
+        if raw.isdigit():
+            parsed = datetime.strptime(raw.zfill(4), "%H%M")
+        else:
+            parsed = datetime.strptime(raw, "%H:%M")
         return parsed.strftime("%I:%M %p").lstrip("0")
     except ValueError:
         return raw
