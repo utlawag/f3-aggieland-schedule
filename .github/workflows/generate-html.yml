@@ -12,7 +12,12 @@ on:
           - upcoming
           - current
   schedule:
-    - cron: '15 23 * * 0'
+    - cron: '37 21 * * 0'
+    - cron: '43 23 * * 0'
+
+concurrency:
+  group: weekly-schedule-v2-${{ github.ref }}
+  cancel-in-progress: false
 
 permissions:
   contents: write
